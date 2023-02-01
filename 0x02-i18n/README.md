@@ -1,86 +1,69 @@
-Caching
-This project contains tasks for learning to cache data.
+i18n
+This project contains tasks for learning to create internationalized web pages with Flask.
 
 Tasks To Complete
- 0. Basic dictionary
-0-basic_cache.py contains a Python class BasicCache that inherits from BaseCaching and is a caching system:
+ 0. Basic Flask app
+0-app.py contains a Python script that sets up a basic Flask app with the following requirements:
 
-You must use self.cache_data - dictionary from the parent class BaseCaching.
-This caching system doesn't have limit.
-def put(self, key, item)::
-Must assign to the dictionary self.cache_data the item value for the key key.
-If key or item is None, this method should not do anything.
-def get(self, key)::
-Must return the value in self.cache_data linked to key.
-If key is None or if the key doesn't exist in self.cache_data, return None.
- 1. FIFO caching
-1-fifo_cache.py contains a Python class FIFOCache that inherits from BaseCaching and is a caching system:
+Create a single / route and an index.html template that simply outputs “Welcome to Holberton” as page title (<title>) and “Hello world” as header (<h1>).
+ 1. Basic Babel setup
 
-You must use self.cache_data - dictionary from the parent class BaseCaching.
-You can overload def __init__(self): but don't forget to call the parent init: super().__init__().
-def put(self, key, item)::
-Must assign to the dictionary self.cache_data the item value for the key key.
-If key or item is None, this method should not do anything.
-If the number of items in self.cache_data is higher than BaseCaching.MAX_ITEMS:
-You must discard the first item put in cache (FIFO algorithm).
-You must print DISCARD:  with the key discarded and following by a new line.
-def get(self, key)::
-Must return the value in self.cache_data linked to key.
-If key is None or if the key doesn't exist in self.cache_data, return None.
- 2. LIFO Caching
-2-lifo_cache.py contains a Python class LIFOCache that inherits from BaseCaching and is a caching system:
+Copy 0-app.py into 1-app.py and templates/0-index.html into templates/1-index.html.
+Install the Babel Flask extension:
+pip3 install flask_babel
+Instantiate the Babel object in your app. Store it in a module-level variable named babel.
+In order to configure available languages in our app, you will create a Config class that has a LANGUAGES class attribute equal to ["en", "fr"].
+Use Config to set Babel’s default locale ("en") and timezone ("UTC").
+Use that class as config for your Flask app.
+ 2. Get locale from request
 
-You must use self.cache_data - dictionary from the parent class BaseCaching.
-You can overload def __init__(self): but don't forget to call the parent init: super().__init__().
-def put(self, key, item)::
-Must assign to the dictionary self.cache_data the item value for the key key.
-If key or item is None, this method should not do anything.
-If the number of items in self.cache_data is higher than BaseCaching.MAX_ITEMS:
-You must discard the last item put in cache (LIFO algorithm).
-You must print DISCARD:  with the key discarded and following by a new line.
-def get(self, key)::
-Must return the value in self.cache_data linked to key.
-If key is None or if the key doesn't exist in self.cache_data, return None.
- 3. LRU Caching
-3-lru_cache.py contains a Python class LRUCache that inherits from BaseCaching and is a caching system:
+Copy 1-app.py into 2-app.py and templates/1-index.html into templates/2-index.html.
+Create a get_locale function with the babel.localeselector decorator. Use request.accept_languages to determine the best match with our supported languages.
+ 3. Parametrize templates
 
-You must use self.cache_data - dictionary from the parent class BaseCaching.
-You can overload def __init__(self): but don't forget to call the parent init: super().__init__().
-def put(self, key, item)::
-Must assign to the dictionary self.cache_data the item value for the key key.
-If key or item is None, this method should not do anything.
-If the number of items in self.cache_data is higher than BaseCaching.MAX_ITEMS:
-You must discard the least recently used item (LRU algorithm).
-You must print DISCARD:  with the key discarded and following by a new line.
-def get(self, key)::
-Must return the value in self.cache_data linked to key.
-If key is None or if the key doesn't exist in self.cache_data, return None.
- 4. MRU Caching
-4-mru_cache.py contains a Python class MRUCache that inherits from BaseCaching and is a caching system:
+Copy 2-app.py into 3-app.py and templates/2-index.html into templates/3-index.html.
+Use the _ or gettext function to parametrize your templates. Use the message IDs home_title and home_header.
+Create a babel.cfg file containing:
+[python: **.py]
+[jinja2: **/templates/**.html]
+extensions=jinja2.ext.autoescape,jinja2.ext.with_
+Initialize your translations with:
+~/.local/bin/pybabel extract -F babel.cfg -o messages.pot .
+Initialize your two dictionaries with:
+~/.local/bin/pybabel init -i messages.pot -d translations -l en
+~/.local/bin/pybabel init -i messages.pot -d translations -l fr
+Edit files translations/[en|fr]/LC_MESSAGES/messages.po to provide the correct value for each message ID for each language. Use the following translations:
+msgid	English	French
+home_title	"Welcome to Holberton"	"Bienvenue chez Holberton"
+home_header	"Hello world!"	"Bonjour monde!"
+Compile your dictionaries with:
+~/.local/bin/pybabel compile -d translations
+Reload the home page of your app and make sure that the correct messages show up.
+ 4. Force locale with URL parameter
 
-You must use self.cache_data - dictionary from the parent class BaseCaching.
-You can overload def __init__(self): but don't forget to call the parent init: super().__init__().
-def put(self, key, item)::
-Must assign to the dictionary self.cache_data the item value for the key key.
-If key or item is None, this method should not do anything.
-If the number of items in self.cache_data is higher than BaseCaching.MAX_ITEMS:
-You must discard the most recently used item (MRU algorithm).
-You must print DISCARD:  with the key discarded and following by a new line
-def get(self, key)::
-Must return the value in self.cache_data linked to key.
-If key is None or if the key doesn't exist in self.cache_data, return None.
- 5. LFU Caching
-100-lfu_cache.py contains a Python class LFUCache that inherits from BaseCaching and is a caching system:
+In this task, you will implement a way to force a particular locale by passing the locale=fr parameter to your app’s URLs.
+Copy 3-app.py into 4-app.py and templates/3-index.html into templates/4-index.html.
+In your get_locale function, detect if the incoming request contains locale argument and if its value is a supported locale, return it. If not or if the parameter is not present, resort to the previous default behavior.
+You should be able to test different translations by visiting http://127.0.0.1:5000?locale=[fr|en].
+Visiting http://127.0.0.1:5000/?locale=fr should display this level 1 heading:
+Hello World! in French
+ 5. Mock logging in
 
-You must use self.cache_data - dictionary from the parent class BaseCaching.
-You can overload def __init__(self): but don't forget to call the parent init: super().__init__().
-def put(self, key, item)::
-Must assign to the dictionary self.cache_data the item value for the key key.
-If key or item is None, this method should not do anything.
-If the number of items in self.cache_data is higher than BaseCaching.MAX_ITEMS:
-You must discard the least frequency used item (LFU algorithm).
-If you find more than 1 item to discard, you must use the LRU algorithm to discard only the least recently used.
-You must print DISCARD:  with the key discarded and following by a new line.
-def get(self, key)::
-Must return the value in self.cache_data linked to key.
-If key is None or if the key doesn't exist in self.cache_data, return None.
+Copy 4-app.py into 5-app.py and templates/4-index.html into templates/5-index.html.
+Creating a user login system is outside the scope of this project. To emulate a similar behavior, copy the following user table into 5-app.py.
+users = {
+    1: {"name": "Balou", "locale": "fr", "timezone": "Europe/Paris"},
+    2: {"name": "Beyonce", "locale": "en", "timezone": "US/Central"},
+    3: {"name": "Spock", "locale": "kg", "timezone": "Vulcan"},
+    4: {"name": "Teletubby", "locale": None, "timezone": "Europe/London"},
+}
+This will mock a database user table. Logging in will be mocked by passing login_as URL query parameter containing the user ID to log in as.
+Define a get_user function that returns a user dictionary or None if the ID cannot be found or if login_as was not passed.
+Define a before_request function and use the app.before_request decorator to make it be executed before all other functions. before_request should use get_user to find a user if any, and set it as a global on flask.g.user.
+In your HTML template, if a user is logged in, in a paragraph tag, display a welcome message otherwise display a default message as shown in the table below.
+msgid	English	French
+logged_in_as	"You are logged in as %(username)s."	"Vous êtes connecté en tant que %(username)s."
+not_logged_in	"You are not logged in."	"Vous n'êtes pas connecté."
+Visiting http://127.0.0.1:5000/ in your browser should display this:
+Hello World! in English with a logged out message
+Visiting http://127.0.0.1:5000/?login_as=2 in your browser should display this:
